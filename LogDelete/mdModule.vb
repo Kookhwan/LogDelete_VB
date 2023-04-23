@@ -42,36 +42,44 @@ Module functions
             Exit Sub
         End If
 
+        Application.DoEvents()
+
         If Directory.Exists(strPath) Then
 
-            '// Delete specific files from the Directory
-            For Each filepath As String In Directory.GetFiles(strPath)
-                If pfunValidation(nIndex, filepath) Then
-                    Call psubSetHistory(filepath, "File")
-                    File.Delete(filepath)
-                End If
-            Next
+            Try
 
-            '// Go to sub directories to find files
-            For Each dir As String In Directory.GetDirectories(strPath)
-                gsubSearch(nIndex, dir) '// Go to sub directory
-            Next
+                frmMain.txtFullPath.Text = strPath
 
-            '// if strPath is not main directory, then keep processing
-            If gFileList(nIndex).strPath <> strPath Then
+                For Each filepath As String In Directory.GetFiles(strPath)
+                    If pfunValidation(nIndex, filepath) Then
+                        '// Delete specific files from the Directory
+                        Call psubSetHistory(filepath, nIndex, "File")
+                    End If
+                Next
 
-                '// if there are no files and Directories, then delete a folder.
-                If Directory.EnumerateFiles(strPath).Count = 0 And Directory.EnumerateDirectories(strPath).Count = 0 Then
+                '// Go to sub directories to find files
+                For Each dir As String In Directory.GetDirectories(strPath)
+                    gsubSearch(nIndex, dir) '// Go to sub directory
+                Next
 
-                    If pfunValidation(nIndex, strPath) Then
-                        '// Delete a Directory
-                        Call psubSetHistory(strPath, "Folder")
-                        Directory.Delete(strPath)
+                '// if strPath is not main directory, then keep processing
+                If gFileList(nIndex).strPath <> strPath Then
+
+                    '// if there are no files and Directories, then delete a folder.
+                    If Directory.EnumerateFiles(strPath).Count = 0 And Directory.EnumerateDirectories(strPath).Count = 0 Then
+
+                        If pfunValidation(nIndex, strPath) Then
+                            '// Delete a Directory
+                            Call psubSetHistory(strPath, nIndex, "Folder")
+                        End If
+
                     End If
 
                 End If
 
-            End If
+            Catch ex As Exception
+                Call gsubSetLogInfo(ex.Message)
+            End Try
 
         End If
 
@@ -101,8 +109,6 @@ Module functions
         End If
 
         pfunValidation = bReturn
-
-        Application.DoEvents()
 
     End Function
 
@@ -141,22 +147,59 @@ Module functions
     End Function
 
     '// Adding history in the list box
-    Public Sub psubSetHistory(ByVal strPath As String, ByVal strType As String)
+    Private Sub psubSetHistory(ByVal strPath As String, ByVal nIndex As Integer, ByVal strType As String)
 
         Dim objFileInfo As New FileInfo(strPath)
         Dim strMessage As String
+        Dim strWriteTime As String
 
         strMessage = ""
-        strMessage = strMessage & "[" & DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") & "] "
-        strMessage = strMessage & "File Path: " & objFileInfo.FullName & ", "
+        'strMessage = strMessage & "[" & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") & "] "
+        strMessage = strMessage & "File Path: " & Replace(objFileInfo.FullName, gFileList(nIndex).strPath, "") & ", "
         strMessage = strMessage & "Type: " & strType & ", "
-        strMessage = strMessage & "Last Modified: " & objFileInfo.LastWriteTime
+
+        Try
+            strWriteTime = objFileInfo.LastWriteTime
+
+            If strType = "Folder" Then
+                Directory.Delete(strPath)
+            Else
+                File.Delete(strPath)
+            End If
+
+            strMessage = strMessage & "Last Modified: " & strWriteTime
+
+        Catch ex As Exception
+            strMessage = strMessage & "Error: " & ex.Message
+        End Try
+
+        'frmMain.lstHistory.Items.Insert(0, strMessage)
+
+        'If frmMain.lstHistory.Items.Count > 40000 Then
+        '    frmMain.lstHistory.Items.RemoveAt(frmMain.lstHistory.Items.Count - 1)
+        'End If
+
+        Call gsubSetLogInfo(strMessage)
+
+        Application.DoEvents()
+
+    End Sub
+
+    Public Sub gsubSetLogInfo(ByVal strMessage As String)
+
+        Dim strDateTime As String
+
+        strDateTime = "[" & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") & "] "
+
+        strMessage = strDateTime & strMessage
 
         frmMain.lstHistory.Items.Insert(0, strMessage)
 
         If frmMain.lstHistory.Items.Count > 40000 Then
             frmMain.lstHistory.Items.RemoveAt(frmMain.lstHistory.Items.Count - 1)
         End If
+
+        Application.DoEvents()
 
     End Sub
 

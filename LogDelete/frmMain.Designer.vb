@@ -30,6 +30,8 @@ Partial Class frmMain
         Me.btnStart = New System.Windows.Forms.Button()
         Me.tabLogDelete = New System.Windows.Forms.TabControl()
         Me.tabHistory = New System.Windows.Forms.TabPage()
+        Me.grbFullLog = New System.Windows.Forms.GroupBox()
+        Me.txtFullPath = New System.Windows.Forms.TextBox()
         Me.lstHistory = New System.Windows.Forms.ListBox()
         Me.grbLog = New System.Windows.Forms.GroupBox()
         Me.txtLogPath = New System.Windows.Forms.TextBox()
@@ -94,6 +96,7 @@ Partial Class frmMain
         CType(Me.picTitle, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabLogDelete.SuspendLayout()
         Me.tabHistory.SuspendLayout()
+        Me.grbFullLog.SuspendLayout()
         Me.grbLog.SuspendLayout()
         Me.tabConfiguration.SuspendLayout()
         Me.grbSetTime.SuspendLayout()
@@ -105,6 +108,7 @@ Partial Class frmMain
         '
         'grbMenu
         '
+        Me.grbMenu.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None
         Me.grbMenu.Controls.Add(Me.picTitle)
         Me.grbMenu.Controls.Add(Me.btnStop)
         Me.grbMenu.Controls.Add(Me.btnStart)
@@ -116,11 +120,12 @@ Partial Class frmMain
         '
         'picTitle
         '
-        Me.picTitle.Image = CType(resources.GetObject("picTitle.Image"), System.Drawing.Image)
+        Me.picTitle.BackgroundImage = CType(resources.GetObject("picTitle.BackgroundImage"), System.Drawing.Image)
+        Me.picTitle.ErrorImage = Nothing
         Me.picTitle.InitialImage = Nothing
         Me.picTitle.Location = New System.Drawing.Point(6, 10)
         Me.picTitle.Name = "picTitle"
-        Me.picTitle.Size = New System.Drawing.Size(573, 63)
+        Me.picTitle.Size = New System.Drawing.Size(583, 63)
         Me.picTitle.TabIndex = 26
         Me.picTitle.TabStop = False
         '
@@ -162,6 +167,7 @@ Partial Class frmMain
         Me.tabHistory.BackColor = System.Drawing.Color.AliceBlue
         Me.tabHistory.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None
         Me.tabHistory.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.tabHistory.Controls.Add(Me.grbFullLog)
         Me.tabHistory.Controls.Add(Me.lstHistory)
         Me.tabHistory.Controls.Add(Me.grbLog)
         Me.tabHistory.Cursor = System.Windows.Forms.Cursors.Default
@@ -172,13 +178,32 @@ Partial Class frmMain
         Me.tabHistory.TabIndex = 1
         Me.tabHistory.Text = "History"
         '
+        'grbFullLog
+        '
+        Me.grbFullLog.Controls.Add(Me.txtFullPath)
+        Me.grbFullLog.Location = New System.Drawing.Point(6, 435)
+        Me.grbFullLog.Name = "grbFullLog"
+        Me.grbFullLog.Size = New System.Drawing.Size(785, 49)
+        Me.grbFullLog.TabIndex = 2
+        Me.grbFullLog.TabStop = False
+        Me.grbFullLog.Text = "Processing Path"
+        '
+        'txtFullPath
+        '
+        Me.txtFullPath.BackColor = System.Drawing.SystemColors.ControlLight
+        Me.txtFullPath.Location = New System.Drawing.Point(6, 18)
+        Me.txtFullPath.Name = "txtFullPath"
+        Me.txtFullPath.ReadOnly = True
+        Me.txtFullPath.Size = New System.Drawing.Size(773, 20)
+        Me.txtFullPath.TabIndex = 0
+        '
         'lstHistory
         '
         Me.lstHistory.FormattingEnabled = True
         Me.lstHistory.HorizontalScrollbar = True
         Me.lstHistory.Location = New System.Drawing.Point(6, 61)
         Me.lstHistory.Name = "lstHistory"
-        Me.lstHistory.Size = New System.Drawing.Size(785, 433)
+        Me.lstHistory.Size = New System.Drawing.Size(785, 368)
         Me.lstHistory.TabIndex = 1
         '
         'grbLog
@@ -189,12 +214,13 @@ Partial Class frmMain
         Me.grbLog.Size = New System.Drawing.Size(785, 49)
         Me.grbLog.TabIndex = 0
         Me.grbLog.TabStop = False
-        Me.grbLog.Text = "Processing Path"
+        Me.grbLog.Text = "Status"
         '
         'txtLogPath
         '
         Me.txtLogPath.Location = New System.Drawing.Point(6, 18)
         Me.txtLogPath.Name = "txtLogPath"
+        Me.txtLogPath.ReadOnly = True
         Me.txtLogPath.Size = New System.Drawing.Size(773, 20)
         Me.txtLogPath.TabIndex = 0
         '
@@ -828,11 +854,13 @@ Partial Class frmMain
         Me.MinimumSize = New System.Drawing.Size(840, 540)
         Me.Name = "frmMain"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Log Delete"
+        Me.Text = "File Cleaner"
         Me.grbMenu.ResumeLayout(False)
         CType(Me.picTitle, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabLogDelete.ResumeLayout(False)
         Me.tabHistory.ResumeLayout(False)
+        Me.grbFullLog.ResumeLayout(False)
+        Me.grbFullLog.PerformLayout()
         Me.grbLog.ResumeLayout(False)
         Me.grbLog.PerformLayout()
         Me.tabConfiguration.ResumeLayout(False)
@@ -915,4 +943,6 @@ Partial Class frmMain
     Friend WithEvents picTitle As PictureBox
     Friend WithEvents tabHistory As TabPage
     Friend WithEvents chkAutoRun As CheckBox
+    Friend WithEvents grbFullLog As GroupBox
+    Friend WithEvents txtFullPath As TextBox
 End Class

@@ -43,7 +43,15 @@ Public Class frmMain
         lstHistory.Left = grbLog.Left
         lstHistory.Top = grbLog.Top + grbLog.Height + 4
         lstHistory.Width = grbLog.Width
-        lstHistory.Height = tabLogDelete.Height - grbLog.Top - grbLog.Height - 30
+        lstHistory.Height = tabLogDelete.Height - grbLog.Top - grbLog.Height - grbFullLog.Height - 40
+
+        grbFullLog.Left = 5
+        grbFullLog.Top = lstHistory.Top + lstHistory.Height + 4
+        grbFullLog.Width = tabLogDelete.Width - 20
+
+        txtFullPath.Left = 6
+        txtFullPath.Top = 18
+        txtFullPath.Width = grbFullLog.Width - 12
 
         '// Adjust size for configuration tab's controller 
         grdLists.Left = 5
@@ -94,6 +102,12 @@ Public Class frmMain
     End Sub
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        If Process.GetProcessesByName("LogDelete").Count > 1 Then
+            MessageBox.Show("LogDelete is already running", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Close()
+            Exit Sub
+        End If
 
         NotifyIcon1.BalloonTipText = "LogDelete"
         NotifyIcon1.Text = "LogDelete"
@@ -194,8 +208,7 @@ Public Class frmMain
 
             Try
                 lstHistory.Items.Clear()
-                lstHistory.Items.Insert(0, "[" & DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") & "] Processing Start")
-
+                Call gsubSetLogInfo("Processing Start")
                 Call psubRunDateClear()
 
                 oThread = New Thread(AddressOf psubWorkThread)
@@ -228,8 +241,7 @@ Public Class frmMain
             Try
                 gbStart = False
                 oThread.Abort()
-                'lstHistory.Items.Insert(0, "Processing Stop")
-                lstHistory.Items.Insert(0, "[" & DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") & "] Processing Stop")
+                Call gsubSetLogInfo("Processing Stop")
             Catch ex As Exception
                 MsgBox("Can't stop a thread" & vbCrLf & ex.Message)
             End Try
@@ -239,8 +251,9 @@ Public Class frmMain
 
     Private Sub psubWorkThread()
 
-        Dim nIndex As Integer = 0
+        Dim nIndex As Integer
         Dim nHour As Integer
+        Dim nPrivIndex As Integer
 
         Dim nCurDate = Today.ToString("yyyyMMdd")
 
@@ -250,10 +263,8 @@ Public Class frmMain
 
             If gnRunTime(nHour) > 0 Then
 
-                nIndex += 1
                 nIndex = nIndex Mod 20
-
-                If nIndex = 0 Then nIndex = 1
+                nIndex += 1
 
                 If gFileList(nIndex).strPath <> "" Then
 
@@ -261,9 +272,16 @@ Public Class frmMain
 
                         If (Me.InvokeRequired) Then
                             Me.Invoke(Sub()
+
+                                          If nPrivIndex <> nIndex Then
+                                              nPrivIndex = nIndex
+                                              Call gsubSetLogInfo("Starting to work on " & gFileList(nIndex).strList)
+                                          End If
+
                                           Call psubRunPath(nIndex, True)
-                                          Call gsubSearch(1, gFileList(nIndex).strPath)
+                                          Call gsubSearch(nIndex, gFileList(nIndex).strPath)
                                           Call psubRunPath(nIndex)
+                                          txtFullPath.Text = ""
                                       End Sub)
                         End If
 
@@ -275,9 +293,17 @@ Public Class frmMain
 
                 Application.DoEvents()
 
-            End If
+                End If
+
+            'Call gsubSetLogInfo("Finished woking on " & gFileList(nIndex).strList)
 
             Thread.Sleep(3000)
+
+            If (Me.InvokeRequired) Then
+                Me.Invoke(Sub()
+                              txtLogPath.Text = "Idle"
+                          End Sub)
+            End If
 
         End While
 
